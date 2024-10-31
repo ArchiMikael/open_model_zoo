@@ -93,6 +93,13 @@ except ImportError as import_error:
 
 from .pytorch_launcher import PyTorchLauncher
 
+try:
+    from .spektral_launcher import SpektralLauncher
+except ImportError as import_error:
+    SpektralLauncher = unsupported_launcher(
+        'spektral', "Spektral isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
 __all__ = [
     'create_launcher',
     'Launcher',
@@ -106,6 +113,7 @@ __all__ = [
     'ONNXLauncher',
     'PyTorchLauncher',
     'PaddlePaddleLauncher',
+    'SpektralLauncher',
     'DummyLauncher',
     'InputFeeder'
 ]

@@ -53,6 +53,7 @@ from .image_readers import (
     RawpyReader
 )
 from .text_readers import JSONReader
+from .spektral_graph_reader import SpektralGraphReader
 
 __all__ = [
     'BaseReader',
@@ -93,6 +94,7 @@ __all__ = [
     'LMDBReader',
     'KaldiARKReader',
     'JSONReader',
+    'SpektralGraphReader'
 
     'create_reader',
     'REQUIRES_ANNOTATIONS',

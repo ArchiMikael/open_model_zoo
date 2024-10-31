@@ -134,6 +134,7 @@ from .malware_classification import MalwareClassificationDatasetConverter
 from .cvat_hands_and_palm import CVATPalmDetectionConverter, CVATHandLandmarkConverter
 from .parti_prompts import PartiPromptsDatasetConverter
 from .hpatches import HpatchesConverter
+from .spektral_annotation_converter import SpektralConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -269,5 +270,6 @@ __all__ = [
     'CVATPalmDetectionConverter',
     'CVATHandLandmarkConverter',
     'PartiPromptsDatasetConverter',
-    'HpatchesConverter'
+    'HpatchesConverter',
+    'SpektralConverter'
 ]
