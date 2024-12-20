@@ -70,14 +70,11 @@ class ClassificationGraphAccuracy(PerImageEvaluationMetric):
         self.summary_helper = ClassificationProfilingSummaryHelper()
 
     def update(self, annotation, prediction):
-        pred_labels = prediction.scores
+        pred_labels = (prediction.scores)[0]
         annotation_labels = annotation.label
 
-        for i in range(min(len(pred_labels), len(annotation_labels))):
-            _annotation = [int(item) for item in annotation_labels[i]]
-            _prediction = [int(item) for item in pred_labels[i]]
-            accuracy = accuracy_score(_annotation, _prediction)
-            self.accuracy.append(accuracy)
+        accuracy = accuracy_score(annotation_labels, pred_labels)
+        self.accuracy.append(accuracy)
 
         if self.profiler:
             self.summary_helper.submit_data(annotation.label, prediction.top_k(self.top_k), prediction.scores)

@@ -9,6 +9,19 @@ import numpy as np
 from collections import OrderedDict
 from ..utils import string_to_tuple
 
+try:
+    import spektral  # pylint: disable=C0415
+except ImportError as import_error:
+    raise ValueError(
+        "Spektral isn't installed. Please, install it before using. \n{}".format(
+            import_error.msg))
+try:
+    import tensorflow as tf  # pylint: disable=C0415
+except ImportError as import_error:
+    raise ValueError(
+        "Tensorflow isn't installed. Please, install it before using. \n{}".format(
+            import_error.msg))
+
 
 class SpektralLauncher(Launcher):
     __provider__ = "spektral"
@@ -20,24 +33,7 @@ class SpektralLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
-        try:
-            import tensorflow  # pylint: disable=C0415
-            self._tf = tensorflow
-        except ImportError as import_error:
-            raise ValueError(
-                "Tensorflow isn't installed. Please, install it before using. \n{}".format(
-                    import_error.msg
-                )
-            )
-        try:
-            import spektral  # pylint: disable=C0415
-            self._spektral = spektral
-        except ImportError as import_error:
-            raise ValueError(
-                "Spektral isn't installed. Please, install it before using. \n{}".format(
-                    import_error.msg
-                )
-            )
+
         self.validate_config(config_entry)
 
         self._batch = self.get_value_from_config("batch")
@@ -57,7 +53,7 @@ class SpektralLauncher(Launcher):
 
     def _load_model(self, model_path):
         if str(model_path).endswith('keras') == True:
-            model = self._tf.keras.saving.load_model(model_path, compile=True)
+            model = tf.keras.saving.load_model(model_path, compile=True)
 
             return model
 
@@ -70,7 +66,7 @@ class SpektralLauncher(Launcher):
         return self._batch
 
     def predict(self, inputs, metadata=None, **kwargs):
-        class DummyDataset(self._spektral.data.Dataset):
+        class DummyDataset(spektral.data.Dataset):
             def __init__(self, _graph, **kwargs):
                 self.graph = _graph
 
@@ -87,11 +83,11 @@ class SpektralLauncher(Launcher):
         result = []
 
         for batch_input in inputs:
-            input_loader = self._spektral.data.SingleLoader(DummyDataset(batch_input['input'][0]))
+            input_loader = spektral.data.SingleLoader(DummyDataset(batch_input['input'][0]))
 
             slice_input, _ = input_loader.__next__()
 
-            result.append({'output': self._model(slice_input, training=False)})
+            result.append({'output': tf.math.argmax(self._model(slice_input, training=False), 1)})
 
         return result
 
