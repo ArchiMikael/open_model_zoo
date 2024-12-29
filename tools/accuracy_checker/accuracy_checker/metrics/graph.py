@@ -4,24 +4,27 @@ from ..representation import (
     ClassificationAnnotation,
     ClassificationPrediction,
     TextClassificationAnnotation,
-    UrlClassificationAnnotation,
     ArgMaxClassificationPrediction,
-    AnomalySegmentationAnnotation,
-    AnomalySegmentationPrediction
 )
 
 from .classification import ClassificationProfilingSummaryHelper
 
-from ..config import NumberField, StringField, ConfigError, BoolField
-from .metric import Metric, PerImageEvaluationMetric
-from .average_meter import AverageMeter
+from ..config import NumberField, BoolField
+from .metric import PerImageEvaluationMetric
 from ..utils import UnsupportedPackage
 
 try:
-    from sklearn.metrics import accuracy_score, confusion_matrix
+    from sklearn.metrics import accuracy_score
 except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
     confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
+
+try:
+    from tensorflow import keras
+except ImportError as import_error:
+    raise ValueError(
+        "Tensorflow isn't installed. Please, install it before using. \n{}".format(
+            import_error.msg))
 
 
 
@@ -70,10 +73,11 @@ class ClassificationGraphAccuracy(PerImageEvaluationMetric):
         self.summary_helper = ClassificationProfilingSummaryHelper()
 
     def update(self, annotation, prediction):
-        pred_labels = (prediction.scores)[0]
-        annotation_labels = annotation.label
-
-        accuracy = accuracy_score(annotation_labels, pred_labels)
+        pred_labels = keras.utils.to_categorical((prediction.scores)[0]-1, num_classes=max((prediction.scores)[0]))
+        annotation_labels = keras.utils.to_categorical(annotation.label-1, num_classes=max(annotation.label))
+        _metrics = keras.metrics.CategoricalAccuracy()
+        _metrics.update_state(pred_labels, annotation_labels)
+        accuracy = _metrics.result()
         self.accuracy.append(accuracy)
 
         if self.profiler:

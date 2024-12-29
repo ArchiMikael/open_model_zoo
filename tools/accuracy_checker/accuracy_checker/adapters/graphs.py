@@ -1,9 +1,7 @@
 import numpy as np
 
 from . import Adapter
-from ..config import BoolField, StringField, NumberField
-from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
-from ..utils import softmax
+from ..representation import ClassificationPrediction
 
 
 class GraphNodeClassificationAdapter(Adapter):
